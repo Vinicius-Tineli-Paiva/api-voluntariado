@@ -15,3 +15,14 @@ db.open((err) => {
     }
     console.log("Banco de dados aberto");
 });
+
+//Adicionar dados
+function addData (key, value) {
+    db.put(key, value, (err) => {
+        if (err) {
+            console.error("Erro ao adicionar dados: ", err);
+        } else {
+            console.log("Dados adicionados com sucesso");
+        }
+    }); 
+}
