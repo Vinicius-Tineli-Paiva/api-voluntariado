@@ -37,3 +37,16 @@ function getData (key, callback) {
         }
     });
 }
+
+//Excluir dados
+function deleteData (key) {
+    db.del(key, (err) => {
+        if (err) {
+            console.error("Erro ao excluir dados", err);
+        } else {
+            console.log("Dados excluídos com sucesso");
+        }
+    });
+}
+
+module.exports = { addData, getData, deleteData }
