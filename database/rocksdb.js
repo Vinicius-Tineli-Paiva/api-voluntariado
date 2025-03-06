@@ -49,4 +49,4 @@ function deleteData (key) {
     });
 }
 
-module.exports = { addData, getData, deleteData }
+module.exports = { db, addData, getData, deleteData }
