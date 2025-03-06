@@ -26,3 +26,14 @@ function addData (key, value) {
         }
     }); 
 }
+
+//Buscar dados
+function getData (key, callback) {
+    db.get (key, (err,value) => {
+        if (err) {
+            console.error("Erro ao buscar dados: ", err);
+        } else {
+            callback(value);
+        }
+    });
+}
