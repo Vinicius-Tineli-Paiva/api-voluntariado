@@ -32,16 +32,39 @@ document.getElementById("login-form").addEventListener("submit", async function 
     }
 });
 
-//Verifica se usuario eh admin
-function checkAdminPrivileges() {
-    const token = localStorage.getItem("token");
-    if (token) {
-        const decoded = JsonWebTokenError.decode(token);
-        if (decoded && decoded.isAdmin) {
-            document.getElementById("admin-container").style.display = "block";
-        }
+// Envio do formulario de cadastro
+document.getElementById("register-form").addEventListener("submit", async function (event) {
+    event.preventDefault(); //Evitar recarregamento da página
+
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("register-email").value;
+    const password = document.getElementById("register-password").value;
+    const errorMessage = document.getElementById("register-error");
+
+    // Validação do formulário
+    if (!name || !email || !password) {
+        return errorMessage.textContent = "Todos os campos são obrigatórios!";
     }
-}
+
+    try {
+        const response = await fetch(`${API_URL}/auth/register`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert("Cadastro realizado com sucesso!");
+            document.getElementById("register-form").reset(); // Limpar o formulário
+        } else {
+            errorMessage.textContent = "Erro: " + data.message;
+        }
+    } catch (error) {
+        errorMessage.textContent = "Erro ao conectar com o servidor";
+    }
+});
 
 //Buscar atividades disponíveis
 async function loadActivities() {
@@ -54,19 +77,18 @@ async function loadActivities() {
 
         // Renderiza atividades
         if(response.ok) {
-            container.innerHTML = activities.map(activity =>
+            container.innerHTML = activities.map(activity => `
                 <div class="activity">
-                    <h3>${activity.title}</h3>
-                    <p>${activity.description}</p>
-                    <p><strong>Data:</strong> ${activity.date}</p>
-                    <p><strong>Local: </strong> ${activity.location}</p>
-                    <p><strong>Vagas disponíveis: </strong> ${activity.maxParticipants - activity.participants.length}</p>
-                    <button onclick="registerForActivity(`${activity.id}`">Inscrever-se</button>
-                    ${activity.participants.includes(localStorage.getItem("token")) ?
-                        `<button onclick="cancelRegistration('${activity.title}')">Cancelar Inscrição</button>` : ''
-                    }
+                  <h3>${activity.title}</h3>
+                  <p>${activity.description}</p>
+                  <p><strong>Data:</strong> ${activity.date}</p>
+                  <p><strong>Local: </strong> ${activity.location}</p>
+                  <p><strong>Vagas disponíveis: </strong> ${activity.maxParticipants - activity.participants.length}</p>
+                  <button onclick="registerForActivity('${activity.id}')">Inscrever-se</button>
+                  ${activity.participants.includes(localStorage.getItem("token")) ?
+                      `<button onclick="cancelRegistration('${activity.title}')">Cancelar Inscrição</button>` : ''}
                 </div>
-            ).join("");
+              `).join("");
         } else {
             container.innerHTML = "<p>Erro ao carregar atividades<p>";
         }
@@ -85,7 +107,7 @@ async function registerForActivity(activityId) {
     }
 
     try {
-        const response = await fetch(`${API_URL}/activities/${activityId}/register`, {
+        await fetch(`${API_URL}/activities/${activityId}/register`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -139,4 +161,3 @@ async function cancelRegistration(activityId) {
 
 //Carrega as atividades ao iniciar a pagina
 loadActivities();
-checkAdminPrivileges();

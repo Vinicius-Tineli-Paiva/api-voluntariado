@@ -19,7 +19,7 @@ app.use(express.static("frontend"))
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/activities", require("./routes/activityRoutes"));
 
-//Inicializacao do servisor
+//Inicializacao do servidor
 app.listen(port, function () {
     console.log(`Rodando em ${port}`);
 })
