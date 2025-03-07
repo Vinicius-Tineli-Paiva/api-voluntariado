@@ -20,27 +20,19 @@
         <p id="login-error" class="error-message"></p>
     </div>
 
-        <!-- Cadastro -->
-        <div class="register-container">
-            <h2>Cadastro</h2>
-            <form id="register-form">
-                <input type="text" id="name" placeholder="Nome" required>
-                <input type="email" id="register-email" placeholder="E-mail" required>
-                <input type="password" id="register-password" placeholder="Senha" required>
-                <button type="submit">Cadastrar</button>
-            </form>
-            <p id="register-error" class="error-message"></p>
-        </div>
-
-    <!-- Tela de Administrador -->
-     <div class="admin-container" id="admin-container" style="display: none;">
-        <h2>Painel de Administrador</h2>
-        <button onclick="showAdminControls()">Criar Nova Atividade</button>
-     </div>
-
-    <!-- Atividades -->
-    <div class="container" id="activities-container">
-        <p>Carregando atividades</p>
+    <!-- Cadastro -->
+    <div class="register-container">
+        <h2>Cadastro</h2>
+        <form id="register-form">
+            <input type="text" id="name" placeholder="Nome" required />
+            <input type="email" id="register-email" placeholder="Email" required />
+            <input type="password" id="register-password" placeholder="Senha" required />
+            <label for="isAdmin">
+                <input type="checkbox" id="isAdmin" /> Administrador
+            </label>
+            <button type="submit">Cadastrar</button>
+        </form>
+        <p id="register-error" class="error-message"></p>
     </div>
 
     <script src="script.js"></script>

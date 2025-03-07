@@ -1,14 +1,24 @@
 const express = require('express');
+const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
+const activityController = require('../controllers/activityController'); // Importe o controlador corretamente
 const router = express.Router();
-const { authMiddleware } = require('../middlewares/authMiddleware');
-const activityController = require('../controllers/activityController');
 
-// Rotas de atividades
-router.post('/', authMiddleware, activityController.createActivity); // Criar atividade (Admin)
-router.get('/', activityController.getAllActivities); // Listar atividades
-router.post('/:activityId/register', authMiddleware, activityController.registerInActivity); // Inscrever usuário
-router.delete('/:activityId/register', authMiddleware, activityController.cancelRegistration); // Cancelar inscrição
-router.put("/:activityId", authMiddleware, activityController.editActivity); // Editar atividade (Admin)
-router.delete("/:activityId", authMiddleware, activityController.deleteActivity); // Remover atividade (Admin)
+// Rota para criar atividade (somente administrador)
+router.post('/', authMiddleware, isAdmin, activityController.createActivity);
+
+// Rota para listar todas as atividades
+router.get('/', authMiddleware, activityController.getAllActivities);
+
+// Rota para inscrever-se em uma atividade
+router.post('/:activityId/register', authMiddleware, activityController.registerInActivity);
+
+// Rota para cancelar inscrição em uma atividade
+router.delete('/:activityId/cancel', authMiddleware, activityController.cancelRegistration);
+
+// Rota para editar atividade (somente administrador)
+router.put('/:activityId', authMiddleware, isAdmin, activityController.editActivity);
+
+// Rota para excluir atividade (somente administrador)
+router.delete('/:activityId', authMiddleware, isAdmin, activityController.deleteActivity);
 
 module.exports = router;

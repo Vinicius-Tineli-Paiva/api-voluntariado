@@ -1,19 +1,44 @@
 const bcrypt = require("bcryptjs");
-const db = require("../database/rocksdb.js");
+const { addData, getData } = require("../database/rocksdb"); // Importe getData corretamente
 
 class User {
-    static async create(email, password, role= "user") {
-        const hash = await bcrypt.hash(password, 10);
-        const user = { email, password: hash, role };
+    // Cria um novo usuário
+    static async create(email, password, role = "user") {
+        try {
+            console.log(`Criando usuário: ${email}`);
 
-        //Salvar no banco de dados
-        await db.addData(`user:${email}`, JSON.stringify(user));
-        return user;
+            // Criptografa a senha
+            const hashedPassword = await bcrypt.hash(password, 10);
+            console.log('Senha criptografada:', hashedPassword);
+
+            // Cria o objeto do usuário
+            const user = { email, password: hashedPassword, role };
+
+            // Salva o usuário no banco de dados
+            await addData(`user:${email}`, JSON.stringify(user));
+            console.log(`Usuário salvo no banco de dados: ${email}`);
+
+            return user;
+        } catch (error) {
+            console.error('Erro ao criar usuário:', error);
+            throw error;
+        }
     }
 
+    // Busca um usuário pelo e-mail
     static async findByEmail(email) {
-        const user = await db.getData(`user:${email}`);
-        return user ? JSON.parse(user) : null;
+        try {
+            console.log(`Buscando usuário: ${email}`);
+            const user = await getData(`user:${email}`); // Usa getData para buscar o usuário
+            return user ? JSON.parse(user) : null;
+        } catch (error) {
+            if (error.message.includes('NotFound')) {
+                console.log('Usuário não encontrado:', email);
+                return null;
+            }
+            console.error('Erro ao buscar usuário:', error);
+            throw error;
+        }
     }
 }
 

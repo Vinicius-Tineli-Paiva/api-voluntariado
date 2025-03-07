@@ -1,15 +1,20 @@
 const API_URL = "http://localhost:8080/api";
 
-//Envio do formulário de login
-document.getElementById("login-form").addEventListener("submit", async function (event) {
-    event.preventDefault(); //Evitar recarregamento da página
+// Verifica se o usuário está logado
+const token = localStorage.getItem("token");
+if (!token) {
+    window.location.href = "index.html"; // Redireciona para login se não estiver logado
+}
+
+// Envio do formulário de login
+document.getElementById("login-form")?.addEventListener("submit", async function (event) {
+    event.preventDefault(); // Evitar recarregamento da página
 
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
     const errorMessage = document.getElementById("login-error");
 
-    
-    //Requisicao de login para a API
+    // Requisição de login para a API
     try {
         const response = await fetch(`${API_URL}/auth/login`, {
             method: "POST",
@@ -20,10 +25,10 @@ document.getElementById("login-form").addEventListener("submit", async function 
         const data = await response.json();
 
         if (response.ok) {
-            //Armazena o token no localStorage
+            // Armazena o token no localStorage
             localStorage.setItem("token", data.token);
             alert("Login realizado com sucesso");
-            window.location.reload(); //Recarrega pag para atualizar interface
+            window.location.href = "activities.html"; // Redireciona para a página de atividades
         } else {
             errorMessage.textContent = "Erro: " + data.message;
         }
@@ -32,14 +37,17 @@ document.getElementById("login-form").addEventListener("submit", async function 
     }
 });
 
-// Envio do formulario de cadastro
-document.getElementById("register-form").addEventListener("submit", async function (event) {
-    event.preventDefault(); //Evitar recarregamento da página
+// Envio do formulário de cadastro
+document.getElementById("register-form")?.addEventListener("submit", async function (event) {
+    event.preventDefault(); // Evitar recarregamento da página
 
     const name = document.getElementById("name").value;
     const email = document.getElementById("register-email").value;
     const password = document.getElementById("register-password").value;
+    const isAdmin = document.getElementById("isAdmin").checked; // Captura o valor do checkbox
     const errorMessage = document.getElementById("register-error");
+
+    console.log('Tentando cadastrar usuário:', { name, email, password, isAdmin });
 
     // Validação do formulário
     if (!name || !email || !password) {
@@ -50,54 +58,99 @@ document.getElementById("register-form").addEventListener("submit", async functi
         const response = await fetch(`${API_URL}/auth/register`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, email, password })
+            body: JSON.stringify({ name, email, password, isAdmin }) // Envia o valor do checkbox
         });
 
         const data = await response.json();
 
         if (response.ok) {
+            console.log('Usuário cadastrado com sucesso:', data);
             alert("Cadastro realizado com sucesso!");
             document.getElementById("register-form").reset(); // Limpar o formulário
         } else {
+            console.error('Erro ao cadastrar usuário:', data);
             errorMessage.textContent = "Erro: " + data.message;
         }
     } catch (error) {
+        console.error('Erro ao conectar com o servidor:', error);
         errorMessage.textContent = "Erro ao conectar com o servidor";
     }
 });
 
-//Buscar atividades disponíveis
+// Buscar atividades disponíveis
 async function loadActivities() {
     const container = document.getElementById("activities-container");
-    container.innerHTML = "<p>Carregando atividades...<p>";
+    container.innerHTML = "<p>Carregando atividades...</p>";
 
     try {
         const response = await fetch(`${API_URL}/activities`);
         const activities = await response.json();
 
         // Renderiza atividades
-        if(response.ok) {
-            container.innerHTML = activities.map(activity => `
-                <div class="activity">
-                  <h3>${activity.title}</h3>
-                  <p>${activity.description}</p>
-                  <p><strong>Data:</strong> ${activity.date}</p>
-                  <p><strong>Local: </strong> ${activity.location}</p>
-                  <p><strong>Vagas disponíveis: </strong> ${activity.maxParticipants - activity.participants.length}</p>
-                  <button onclick="registerForActivity('${activity.id}')">Inscrever-se</button>
-                  ${activity.participants.includes(localStorage.getItem("token")) ?
-                      `<button onclick="cancelRegistration('${activity.title}')">Cancelar Inscrição</button>` : ''}
-                </div>
-              `).join("");
+        if (response.ok) {
+            container.innerHTML = activities.map(activity => {
+                const isUserLoggedIn = localStorage.getItem("token");
+                const userToken = isUserLoggedIn ? JSON.parse(atob(localStorage.getItem("token").split('.')[1])) : null;
+                const isAdmin = userToken && userToken.role === 'admin';
+                const isUserRegistered = activity.participants.includes(userToken?.id);
+
+                return `
+                    <div class="activity">
+                      <h3>${activity.title}</h3>
+                      <p>${activity.description}</p>
+                      <p><strong>Data:</strong> ${activity.date}</p>
+                      <p><strong>Local:</strong> ${activity.location}</p>
+                      <p><strong>Vagas disponíveis:</strong> ${activity.maxParticipants - activity.participants.length}</p>
+                      <button ${isUserRegistered || activity.participants.length >= activity.maxParticipants ? 'disabled' : ''} onclick="registerForActivity('${activity.id}')">Inscrever-se</button>
+                      ${isUserRegistered ? 
+                        `<button onclick="cancelRegistration('${activity.id}')">Cancelar Inscrição</button>` : 
+                        ''}
+                    </div>
+                `;
+            }).join("");
         } else {
-            container.innerHTML = "<p>Erro ao carregar atividades<p>";
+            container.innerHTML = "<p>Erro ao carregar atividades</p>";
         }
     } catch (error) {
-        container.innerHTML = "<p>Erro ao conectar com o servidor<p>";
+        container.innerHTML = "<p>Erro ao conectar com o servidor</p>";
     }
 }
 
-//Para inscrever um usuario em uma atividade
+// Buscar as atividades do usuário
+async function loadUserActivities() {
+    const userContainer = document.getElementById("user-activities-container");
+    userContainer.innerHTML = "<p>Carregando suas atividades...</p>";
+
+    try {
+        const response = await fetch(`${API_URL}/users/activities`, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+        const userActivities = await response.json();
+
+        // Renderiza atividades do usuário
+        if (response.ok) {
+            userContainer.innerHTML = userActivities.map(activity => {
+                return `
+                    <div class="activity">
+                      <h3>${activity.title}</h3>
+                      <p>${activity.description}</p>
+                      <p><strong>Data:</strong> ${activity.date}</p>
+                      <p><strong>Local:</strong> ${activity.location}</p>
+                      <button onclick="cancelRegistration('${activity.id}')">Cancelar Inscrição</button>
+                    </div>
+                `;
+            }).join("");
+        } else {
+            userContainer.innerHTML = "<p>Erro ao carregar suas atividades</p>";
+        }
+    } catch (error) {
+        userContainer.innerHTML = "<p>Erro ao conectar com o servidor</p>";
+    }
+}
+
+// Para inscrever um usuário em uma atividade
 async function registerForActivity(activityId) {
     const token = localStorage.getItem("token");
 
@@ -107,7 +160,7 @@ async function registerForActivity(activityId) {
     }
 
     try {
-        await fetch(`${API_URL}/activities/${activityId}/register`, {
+        const response = await fetch(`${API_URL}/activities/${activityId}/register`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -119,7 +172,8 @@ async function registerForActivity(activityId) {
 
         if (response.ok) {
             alert("Inscrição realizada com sucesso");
-            loadActivities(); //Atualiza lista de atividades
+            loadActivities(); // Atualiza lista de atividades
+            loadUserActivities(); // Atualiza atividades do usuário
         } else {
             alert("Erro: " + data.message);
         }
@@ -128,7 +182,7 @@ async function registerForActivity(activityId) {
     }
 }
 
-//Cancelar atividade
+// Cancelar inscrição em uma atividade
 async function cancelRegistration(activityId) {
     const token = localStorage.getItem("token");
 
@@ -150,7 +204,8 @@ async function cancelRegistration(activityId) {
 
         if (response.ok) {
             alert("Inscrição cancelada com sucesso");
-            loadActivities(); //Atualiza lista de atividades
+            loadActivities(); // Atualiza lista de atividades
+            loadUserActivities(); // Atualiza atividades do usuário
         } else {
             alert("Erro: " + data.message);
         }
@@ -159,5 +214,8 @@ async function cancelRegistration(activityId) {
     }
 }
 
-//Carrega as atividades ao iniciar a pagina
-loadActivities();
+// Carrega as atividades ao iniciar a página (somente na página activities.html)
+if (window.location.pathname.includes("activities.html")) {
+    loadActivities();
+    loadUserActivities();
+}

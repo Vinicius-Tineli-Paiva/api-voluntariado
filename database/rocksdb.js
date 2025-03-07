@@ -1,73 +1,48 @@
-const rocksdb = require("rocksdb");
-const path = require("path");
+const RocksDB = require('rocksdb');
+const path = require('path');
 
-// Caminho para o banco de dados
-const dbPath = path.join(__dirname, "voluntariado.db");
+const dbPath = path.join(__dirname, 'volunteer_db');
+const db = new RocksDB(dbPath);
 
-// Inicializa o banco de dados 
-const db = rocksdb(dbPath);
-
-// Abre o banco de dados
-db.open((err) => {
-    if (err) {
-        console.error("Erro ao abrir o banco de dados", err);
-        return;
-    }
-    console.log("Banco de dados aberto");
+// Abre o banco de dados (cria se não existir)
+db.open({ createIfMissing: true }, (err) => {
+    if (err) console.error('Erro ao abrir o banco de dados:', err);
+    else console.log('Banco de dados aberto com sucesso.');
 });
 
-// Métodos do banco de dados
+// Função para adicionar dados ao banco de dados
 const addData = (key, value) => {
     return new Promise((resolve, reject) => {
         db.put(key, value, (err) => {
             if (err) {
                 console.error('Erro ao adicionar dados:', err);
-                reject(err); // rejeita a Promise em caso de erro
+                reject(err);
             } else {
-                resolve(); // resolve a Promise se a inserção for bem-sucedida
+                console.log(`Dados adicionados com sucesso: ${key}`);
+                resolve();
             }
         });
     });
 };
 
+// Função para buscar dados no banco de dados
 const getData = (key) => {
     return new Promise((resolve, reject) => {
         db.get(key, (err, value) => {
             if (err) {
-                if (err.notFound) {
-                    console.log(`Usuário com email ${key} não encontrado.`);
-                    resolve(null); // Retorna null quando o usuário não é encontrado
+                if (err.message.includes('NotFound')) {
+                    console.log('Chave não encontrada:', key);
+                    resolve(null); // Retorna null se a chave não for encontrada
                 } else {
-                    reject(err); // Erro inesperado
+                    console.error('Erro ao buscar dados:', err);
+                    reject(err);
                 }
             } else {
-                console.log(`Usuário com email ${key} encontrado.`)
-                resolve(value); // Retorna os dados se encontrados
+                resolve(value);
             }
         });
     });
 };
 
-const getAllData = async () => {
-    return new Promise((resolve, reject) => {
-        const activities = [];
-        const iterator = db.iterator({ keys: true, values: true });
-
-        iterator.next(function process(err, key, value) {
-            if (err) {
-                reject(err);
-                return;
-            }
-
-            if (!key) {
-                resolve(activities);
-                return;
-            }
-
-            activities.push(JSON.parse(value.toString()));
-            iterator.next(process);
-        });
-    });
-};
-
-module.exports = { db, addData, getData, getAllData };
+// Exporta as funções para uso em outros arquivos
+module.exports = { db, addData, getData };
