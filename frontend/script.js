@@ -90,31 +90,41 @@ async function loadActivities() {
     container.innerHTML = "<p>Carregando atividades...</p>";
 
     try {
-        const response = await fetch(`${API_URL}/activities`);
+        const response = await fetch(`${API_URL}/activities`, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
         const activities = await response.json();
 
-        // Renderiza atividades
         if (response.ok) {
-            container.innerHTML = activities.map(activity => {
-                const isUserLoggedIn = localStorage.getItem("token");
-                const userToken = isUserLoggedIn ? JSON.parse(atob(localStorage.getItem("token").split('.')[1])) : null;
-                const isAdmin = userToken && userToken.role === 'admin';
-                const isUserRegistered = activity.participants.includes(userToken?.id);
+            if (activities.length === 0) {
+                container.innerHTML = "<p>Nenhuma atividade disponível no momento.</p>";
+            } else {
+                container.innerHTML = activities.map(activity => {
+                    const isUserLoggedIn = localStorage.getItem("token");
+                    const userToken = isUserLoggedIn ? JSON.parse(atob(localStorage.getItem("token").split('.')[1])) : null;
+                    const isAdmin = userToken && userToken.role === 'admin';
+                    const isUserRegistered = activity.participants.includes(userToken?.id);
 
-                return `
-                    <div class="activity">
-                      <h3>${activity.title}</h3>
-                      <p>${activity.description}</p>
-                      <p><strong>Data:</strong> ${activity.date}</p>
-                      <p><strong>Local:</strong> ${activity.location}</p>
-                      <p><strong>Vagas disponíveis:</strong> ${activity.maxParticipants - activity.participants.length}</p>
-                      <button ${isUserRegistered || activity.participants.length >= activity.maxParticipants ? 'disabled' : ''} onclick="registerForActivity('${activity.id}')">Inscrever-se</button>
-                      ${isUserRegistered ? 
-                        `<button onclick="cancelRegistration('${activity.id}')">Cancelar Inscrição</button>` : 
-                        ''}
-                    </div>
-                `;
-            }).join("");
+                    return `
+                        <div class="activity">
+                          <h3>${activity.title}</h3>
+                          <p>${activity.description}</p>
+                          <p><strong>Data:</strong> ${activity.date}</p>
+                          <p><strong>Local:</strong> ${activity.location}</p>
+                          <p><strong>Vagas disponíveis:</strong> ${activity.maxParticipants - activity.participants.length}</p>
+                          <button ${isUserRegistered || activity.participants.length >= activity.maxParticipants ? 'disabled' : ''} onclick="registerForActivity('${activity.id}')">Inscrever-se</button>
+                          ${isUserRegistered ? 
+                            `<button onclick="cancelRegistration('${activity.id}')">Cancelar Inscrição</button>` : 
+                            ''}
+                          ${isAdmin ? 
+                            `<button onclick="showParticipants('${activity.id}')">Ver Participantes</button>` : 
+                            ''}
+                        </div>
+                    `;
+                }).join("");
+            }
         } else {
             container.innerHTML = "<p>Erro ao carregar atividades</p>";
         }
@@ -129,14 +139,13 @@ async function loadUserActivities() {
     userContainer.innerHTML = "<p>Carregando suas atividades...</p>";
 
     try {
-        const response = await fetch(`${API_URL}/users/activities`, {
+        const response = await fetch(`${API_URL}/activities/user/activities`, {
             headers: {
                 "Authorization": `Bearer ${token}`
             }
         });
         const userActivities = await response.json();
 
-        // Renderiza atividades do usuário
         if (response.ok) {
             userContainer.innerHTML = userActivities.map(activity => {
                 return `
@@ -218,6 +227,26 @@ async function cancelRegistration(activityId) {
         }
     } catch (error) {
         alert("Erro ao conectar com o servidor");
+    }
+}
+
+// Exibir participantes de uma atividade (apenas para administradores)
+async function showParticipants(activityId) {
+    try {
+        const response = await fetch(`${API_URL}/activities/${activityId}/participants`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        const participants = await response.json();
+
+        if (response.ok) {
+            alert(`Participantes: ${participants.join(', ')}`);
+        } else {
+            alert('Erro ao carregar participantes');
+        }
+    } catch (error) {
+        alert('Erro ao conectar com o servidor');
     }
 }
 

@@ -1,6 +1,6 @@
 const express = require('express');
 const { authMiddleware, isAdmin } = require('../middlewares/authMiddleware');
-const activityController = require('../controllers/activityController'); // Importe o controlador corretamente
+const activityController = require('../controllers/activityController');
 const router = express.Router();
 
 // Rota para criar atividade (somente administrador)
@@ -20,5 +20,11 @@ router.put('/:activityId', authMiddleware, isAdmin, activityController.editActiv
 
 // Rota para excluir atividade (somente administrador)
 router.delete('/:activityId', authMiddleware, isAdmin, activityController.deleteActivity);
+
+// Rota para listar atividades do usuário
+router.get('/user/activities', authMiddleware, activityController.getUserActivities);
+
+// Rota para listar participantes de uma atividade (somente administrador)
+router.get('/:activityId/participants', authMiddleware, isAdmin, activityController.getActivityParticipants);
 
 module.exports = router;

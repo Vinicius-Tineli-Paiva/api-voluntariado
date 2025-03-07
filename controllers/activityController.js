@@ -48,7 +48,7 @@ exports.registerInActivity = async (req, res) => {
 };
 
 // Cancela inscrição em uma atividade
-exports.cancelRegistration = async (req, res) => {
+    exports.cancelRegistration = async (req, res) => {
     const { activityId } = req.params;
     const activity = await Activity.getById(activityId);
 
@@ -69,8 +69,8 @@ exports.cancelRegistration = async (req, res) => {
     res.status(200).json({ message: 'Inscrição cancelada com sucesso!' });
 };
 
-// Edita atividade (Admin)
-exports.editActivity = async (req, res) => {
+    // Edita atividade (Admin)
+    exports.editActivity = async (req, res) => {
     const { activityId } = req.params;
     const { title, description, date, location, maxParticipants } = req.body;
 
@@ -99,8 +99,8 @@ exports.editActivity = async (req, res) => {
     res.status(200).json(updatedActivity);
 };
 
-// Remove atividade (Admin)
-exports.deleteActivity = async (req, res) => {
+    // Remove atividade (Admin)
+    exports.deleteActivity = async (req, res) => {
     const { activityId } = req.params;
 
     // Verifica se o usuário é um administrador
@@ -117,4 +117,33 @@ exports.deleteActivity = async (req, res) => {
     // Remove a atividade do banco de dados
     await Activity.remove(activityId);
     res.status(200).json({ message: 'Atividade removida com sucesso.' });
+};
+
+// Listar atividades em que o usuário está inscrito
+exports.getUserActivities = async (req, res) => {
+    try {
+        const allActivities = await Activity.getAll();
+        const userActivities = allActivities.filter(activity => 
+            activity.participants.includes(req.user.id)
+        );
+        res.status(200).json(userActivities);
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao buscar atividades do usuário' });
+    }
+};
+
+// Listar participantes de uma atividade (Admin)
+exports.getActivityParticipants = async (req, res) => {
+    const { activityId } = req.params;
+
+    try {
+        const activity = await Activity.getById(activityId);
+        if (!activity) {
+            return res.status(404).json({ message: 'Atividade não encontrada' });
+        }
+
+        res.status(200).json(activity.participants);
+    } catch (error) {
+        res.status(500).json({ message: 'Erro ao buscar participantes' });
+    }
 };
