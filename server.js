@@ -1,4 +1,4 @@
-require("dotenv").config(); // Carrega variáveis de ambiente
+require("dotenv").config(); 
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -8,12 +8,11 @@ const app = express();
 const port = process.env.PORT;
 
 // Middlewares globais
-app.use(helmet()); // Segurança básica
-app.use(cors()); // Permite requisições de outros domínios
-app.use(express.json()); // Habilita o uso de JSON nas requisições
-app.use(cookieParser()); // Habilita o uso de cookies
+app.use(helmet()); 
+app.use(cors()); 
+app.use(express.json()); 
+app.use(cookieParser()); 
 
-// Serve arquivos estáticos do front-end
 app.use(express.static("frontend"));
 
 // Rotas da API
