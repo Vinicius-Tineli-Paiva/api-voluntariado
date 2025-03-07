@@ -1,5 +1,5 @@
 const bcrypt = require("bcryptjs");
-const { addData, getData } = require("../database/rocksdb"); // Importe getData corretamente
+const { addData, getData } = require("../database/rocksdb");
 
 class User {
     // Cria um novo usuário
@@ -29,7 +29,7 @@ class User {
     static async findByEmail(email) {
         try {
             console.log(`Buscando usuário: ${email}`);
-            const user = await getData(`user:${email}`); // Usa getData para buscar o usuário
+            const user = await getData(`user:${email}`);
             return user ? JSON.parse(user) : null;
         } catch (error) {
             if (error.message.includes('NotFound')) {

@@ -10,30 +10,32 @@
     <h1>Atividades Voluntárias para Cachorros</h1>
 
     <!-- Login -->
-    <div class="login-container">
-        <h2>Login</h2>
-        <form id="login-form">
-            <input type="email" id="email" placeholder="E-mail" required>
-            <input type="password" id="password" placeholder="Senha" required>
-            <button type="submit">Entrar</button>
-        </form>
-        <p id="login-error" class="error-message"></p>
-    </div>
+<div class="login-container">
+    <h2>Login</h2>
+    <form id="login-form">
+        <input type="email" id="email" placeholder="E-mail" required>
+        <input type="password" id="password" placeholder="Senha" required>
+        <button type="submit">Entrar</button>
+    </form>
+    <p id="login-error" class="error-message"></p>
+    <p id="login-success" class="success-message"></p> <!-- Nova linha -->
+</div>
 
-    <!-- Cadastro -->
-    <div class="register-container">
-        <h2>Cadastro</h2>
-        <form id="register-form">
-            <input type="text" id="name" placeholder="Nome" required />
-            <input type="email" id="register-email" placeholder="Email" required />
-            <input type="password" id="register-password" placeholder="Senha" required />
-            <label for="isAdmin">
-                <input type="checkbox" id="isAdmin" /> Administrador
-            </label>
-            <button type="submit">Cadastrar</button>
-        </form>
-        <p id="register-error" class="error-message"></p>
-    </div>
+<!-- Cadastro -->
+<div class="register-container">
+    <h2>Cadastro</h2>
+    <form id="register-form">
+        <input type="text" id="name" placeholder="Nome" required />
+        <input type="email" id="register-email" placeholder="Email" required />
+        <input type="password" id="register-password" placeholder="Senha" required />
+        <label for="isAdmin">
+            <input type="checkbox" id="isAdmin" /> Administrador
+        </label>
+        <button type="submit">Cadastrar</button>
+    </form>
+    <p id="register-error" class="error-message"></p>
+    <p id="register-success" class="success-message"></p> <!-- Nova linha -->
+</div>
 
     <script src="script.js"></script>
 </body>

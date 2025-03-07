@@ -13,22 +13,28 @@ document.getElementById("login-form")?.addEventListener("submit", async function
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
     const errorMessage = document.getElementById("login-error");
+    const successMessage = document.getElementById("login-success");
 
-    // Requisição de login para a API
+    // Limpar mensagens anteriores
+    errorMessage.textContent = "";
+    successMessage.textContent = "";
+
     try {
+        // Envia a senha em texto plano para o backend
         const response = await fetch(`${API_URL}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password })
+            body: JSON.stringify({ email, password }) // Senha em texto plano
         });
 
         const data = await response.json();
 
         if (response.ok) {
-            // Armazena o token no localStorage
-            localStorage.setItem("token", data.token);
-            alert("Login realizado com sucesso");
-            window.location.href = "activities.html"; // Redireciona para a página de atividades
+            successMessage.textContent = "Login realizado com sucesso";
+            localStorage.setItem("token", data.token); // Armazena o token no localStorage
+            setTimeout(() => {
+                window.location.href = "activities.html"; // Redireciona para a página de atividades
+            }, 1500); // Aguarda 1.5 segundos antes de redirecionar
         } else {
             errorMessage.textContent = "Erro: " + data.message;
         }
@@ -44,10 +50,13 @@ document.getElementById("register-form")?.addEventListener("submit", async funct
     const name = document.getElementById("name").value;
     const email = document.getElementById("register-email").value;
     const password = document.getElementById("register-password").value;
-    const isAdmin = document.getElementById("isAdmin").checked; // Captura o valor do checkbox
+    const isAdmin = document.getElementById("isAdmin").checked;
     const errorMessage = document.getElementById("register-error");
+    const successMessage = document.getElementById("register-success");
 
-    console.log('Tentando cadastrar usuário:', { name, email, password, isAdmin });
+    // Limpar mensagens anteriores
+    errorMessage.textContent = "";
+    successMessage.textContent = "";
 
     // Validação do formulário
     if (!name || !email || !password) {
@@ -55,24 +64,22 @@ document.getElementById("register-form")?.addEventListener("submit", async funct
     }
 
     try {
+        // Envia a senha em texto plano para o backend
         const response = await fetch(`${API_URL}/auth/register`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ name, email, password, isAdmin }) // Envia o valor do checkbox
+            body: JSON.stringify({ name, email, password, isAdmin }) // Senha em texto plano
         });
 
         const data = await response.json();
 
         if (response.ok) {
-            console.log('Usuário cadastrado com sucesso:', data);
-            alert("Cadastro realizado com sucesso!");
+            successMessage.textContent = "Cadastro realizado com sucesso!";
             document.getElementById("register-form").reset(); // Limpar o formulário
         } else {
-            console.error('Erro ao cadastrar usuário:', data);
             errorMessage.textContent = "Erro: " + data.message;
         }
     } catch (error) {
-        console.error('Erro ao conectar com o servidor:', error);
         errorMessage.textContent = "Erro ao conectar com o servidor";
     }
 });

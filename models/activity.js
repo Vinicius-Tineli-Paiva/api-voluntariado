@@ -10,25 +10,25 @@ class Activity {
 
     // Busca todas as atividades
     static async getAll() {
-        const activities = await getAllData();
-        return activities.filter(activity => activity.title.startsWith('activity:')); // Filtra apenas atividades
+        const allData = await getAllData();
+        return allData.filter(entry => entry.key.startsWith('activity:')).map(entry => entry.value);
     }
 
-    // Busca uma atividade pelo ID (título)
-    static async getById(activityId) {
-        const activity = await getData(`activity:${activityId}`);
-        return activity ? JSON.parse(activity) : null; // Retorna a atividade ou null se não existir
-    }
+   // Busca uma atividade pelo ID
+   static async getById(activityId) {
+    const activity = await getData(activityId);
+    return activity ? JSON.parse(activity) : null;
+}
 
-    // Atualiza uma atividade existente
-    static async update(activityId, updatedActivity) {
-        await addData(`activity:${activityId}`, JSON.stringify(updatedActivity)); // Atualiza no banco de dados
-    }
+// Atualiza uma atividade existente
+static async update(activityId, updatedActivity) {
+    await addData(activityId, JSON.stringify(updatedActivity));
+}
 
-    // Remove uma atividade
-    static async remove(activityId) {
-        await removeData(`activity:${activityId}`); // Remove do banco de dados
-    }
+// Remove uma atividade
+static async remove(activityId) {
+    await removeData(activityId);
+}
 }
 
 module.exports = Activity;

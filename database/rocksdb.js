@@ -44,5 +44,45 @@ const getData = (key) => {
     });
 };
 
-// Exporta as funções para uso em outros arquivos
-module.exports = { db, addData, getData };
+// Função para buscar todas as chaves e valores
+const getAllData = () => {
+    return new Promise((resolve, reject) => {
+        const data = [];
+        const iterator = db.iterator();
+
+        const fetchNext = () => {
+            iterator.next((err, key, value) => {
+                if (err) {
+                    console.error('Erro ao buscar todos os dados:', err);
+                    reject(err);
+                } else if (key && value) {
+                    data.push({ key: key.toString(), value: JSON.parse(value.toString()) });
+                    fetchNext(); // Continua iterando
+                } else {
+                    iterator.end(() => {
+                        resolve(data); // Retorna os dados quando a iteração terminar
+                    });
+                }
+            });
+        };
+
+        fetchNext(); // Inicia a iteração
+    });
+};
+
+// Função para remover dados
+const removeData = (key) => {
+    return new Promise((resolve, reject) => {
+        db.del(key, (err) => {
+            if (err) {
+                console.error('Erro ao remover dados:', err);
+                reject(err);
+            } else {
+                console.log(`Dados removidos com sucesso: ${key}`);
+                resolve();
+            }
+        });
+    });
+};
+
+module.exports = { db, addData, getData, getAllData, removeData };
