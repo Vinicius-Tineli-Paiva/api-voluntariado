@@ -11,7 +11,7 @@ document.getElementById("login-form").addEventListener("submit", async function 
     
     //Requisicao de login para a API
     try {
-        const response = await fetch(`${API_URL/auth/login}`, {
+        const response = await fetch(`${API_URL}/auth/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, password })
@@ -32,6 +32,17 @@ document.getElementById("login-form").addEventListener("submit", async function 
     }
 });
 
+//Verifica se usuario eh admin
+function checkAdminPrivileges() {
+    const token = localStorage.getItem("token");
+    if (token) {
+        const decoded = JsonWebTokenError.decode(token);
+        if (decoded && decoded.isAdmin) {
+            document.getElementById("admin-container").style.display = "block";
+        }
+    }
+}
+
 //Buscar atividades disponíveis
 async function loadActivities() {
     const container = document.getElementById("activities-container");
@@ -51,6 +62,9 @@ async function loadActivities() {
                     <p><strong>Local: </strong> ${activity.location}</p>
                     <p><strong>Vagas disponíveis: </strong> ${activity.maxParticipants - activity.participants.length}</p>
                     <button onclick="registerForActivity(`${activity.id}`">Inscrever-se</button>
+                    ${activity.participants.includes(localStorage.getItem("token")) ?
+                        `<button onclick="cancelRegistration('${activity.title}')">Cancelar Inscrição</button>` : ''
+                    }
                 </div>
             ).join("");
         } else {
@@ -92,5 +106,37 @@ async function registerForActivity(activityId) {
     }
 }
 
+//Cancelar atividade
+async function cancelRegistration(activityId) {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        alert("Você precisa estar logado para cancelar sua inscrição");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_URL}/activities/${activityId}/register`, {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert("Inscrição cancelada com sucesso");
+            loadActivities(); //Atualiza lista de atividades
+        } else {
+            alert("Erro: " + data.message);
+        }
+    } catch (error) {
+        alert("Erro ao conectar com o servidor");
+    }
+}
+
 //Carrega as atividades ao iniciar a pagina
 loadActivities();
+checkAdminPrivileges();

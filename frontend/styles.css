@@ -6,7 +6,7 @@ body {
     text-align: center;
 }
 
-.login-container {
+.login-container, .admin-container {
     max-width: 300px;
     margin: 20px auto;
     padding: 20px;
@@ -52,4 +52,29 @@ button:hover {
     background-color: #fff;
     border-radius: 5px;
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.activity {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+}
+
+.activity button {
+    margin-top: 10px;
+    background-color: #28a745;
+}
+
+.activity button:hover {
+    background-color: #218838;
+}
+
+.activity .cancel-button {
+    background-color: #dc3545;
+}
+
+.activity .cancel-button:hover {
+    background-color: #c82333;
 }

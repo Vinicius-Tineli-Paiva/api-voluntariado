@@ -13,6 +13,8 @@ app.use(cors());
 app.use(express.json());
 app.use(cookieParser());
 
+app.use(express.static("frontend"))
+
 //Gerenciamento de rotas
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/activities", require("./routes/activityRoutes"));
