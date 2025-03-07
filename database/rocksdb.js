@@ -17,36 +17,23 @@ db.open((err) => {
 });
 
 //Adicionar dados
-function addData (key, value) {
+const addData = (key, value) => {
     db.put(key, value, (err) => {
-        if (err) {
-            console.error("Erro ao adicionar dados: ", err);
-        } else {
-            console.log("Dados adicionados com sucesso");
-        }
-    }); 
-}
+      if (err) console.error('Erro ao adicionar dados:', err);
+    });
+  };
 
 //Buscar dados
-function getData (key, callback) {
-    db.get (key, (err,value) => {
-        if (err) {
-            console.error("Erro ao buscar dados: ", err);
-        } else {
-            callback(value);
-        }
+const getData = (key, callback) => {
+    db.get(key, (err, value) => {
+      if (err) {
+        if (err.notFound) return callback(null);
+        console.error('Erro ao buscar dados:', err);
+        return;
+      }
+      callback(value.toString());
     });
-}
+  };
 
-//Excluir dados
-function deleteData (key) {
-    db.del(key, (err) => {
-        if (err) {
-            console.error("Erro ao excluir dados", err);
-        } else {
-            console.log("Dados excluídos com sucesso");
-        }
-    });
-}
 
-module.exports = { db, addData, getData, deleteData }
+module.exports = { db, addData, getData }

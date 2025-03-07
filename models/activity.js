@@ -6,29 +6,37 @@ class Activity {
     const activity = { title, description, date, location, maxParticipants, participants: [] };
     
     // Salva a atividade no banco de dados utilizando o título como chave
-    db.addData(title, JSON.stringify(activity));
+    await db.addData(title, JSON.stringify(activity));
     return activity;
   }
 
   // Método para buscar todas as atividades
   static async getAll() {
     return new Promise((resolve, reject) => {
-      const activities = [];
+        const activities = [];
+        const iterator = db.db.iterator(); // Criamos um iterador
 
-      // Itera sobre as chaves no banco de dados e busca as atividades
-      db.db.iterator({ key_as_buffer: true, value_as_buffer: true })
-        .each((key, value) => {
+        function next() {
+            iterator.next((err, key, value) => {
+                if (err) {
+                    reject("Erro ao buscar atividades: " + err);
+                    return;
+                }
 
-          if (key) {
-            activities.push(JSON.parse(value));
-          }
-        }, (err) => {
-          if (err) {
-            reject('Erro ao buscar atividades:', err);
-          } else {
-            resolve(activities);
-          }
-        });
+                // Se não houver mais chaves, encerramos e resolvemos a Promise
+                if (key === undefined) {
+                    resolve(activities);
+                    return;
+                }
+
+                // Adicionamos a atividade à lista
+                activities.push(JSON.parse(value));
+
+                // Chamamos `next()` recursivamente para buscar o próximo item
+                next();
+            });
+        }
+        next(); 
     });
   }
 
@@ -38,6 +46,8 @@ class Activity {
         db.getData(title, (value) => {
             if(value) {
                 resolve(JSON.parse(value));
+            } else {
+                reject("Atividade não encontrada");
             }
         });
     });

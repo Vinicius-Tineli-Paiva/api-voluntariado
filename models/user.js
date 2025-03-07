@@ -2,25 +2,18 @@ const bcrypt = require("bcryptjs");
 const db = require("../database/rocksdb.js");
 
 class User {
-    static async create(email, password) {
+    static async create(email, password, role= "user") {
         const hash = await bcrypt.hash(password, 10);
-        const user = { email, password: hash };
+        const user = { email, password: hash, role };
 
         //Salvar no banco de dados
-        db.addData(email, JSON.stringify(user));
+        await db.addData(`user:${email}`, JSON.stringify(user));
         return user;
     }
 
     static async findByEmail(email) {
-        return new Promise((resolve, reject) => {
-            db.getData(email, (value) => {
-                if(value) {
-                    resolve(JSON.parse(value));
-                } else {
-                    reject("Usuário não encontrado");
-                }
-            });
-        });
+        const user = await db.getData(`user:${email}`);
+        return user ? JSON.parse(user) : null;
     }
 }
 
