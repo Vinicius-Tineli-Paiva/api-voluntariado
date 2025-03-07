@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000/api";
+const API_URL = "http://localhost:8080/api";
 
 //Envio do formulário de login
 document.getElementById("login-form").addEventListener("submit", async function (event) {
@@ -69,27 +69,27 @@ async function registerForActivity(activityId) {
         alert("Você precisa estar logado para se inscrever");
         return;
     }
-}
 
-try {
-    const response = await fetch(`${API_URL}/activities/${activityId}/register`, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
+    try {
+        const response = await fetch(`${API_URL}/activities/${activityId}/register`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert("Inscrição realizada com sucesso");
+            loadActivities(); //Atualiza lista de atividades
+        } else {
+            alert("Erro: " + data.message);
         }
-    });
-
-    const data = await response.json();
-
-    if (response.ok) {
-        alert("Inscrição realizada com sucesso");
-        loadActivities(); //Atualiza lista de atividades
-    } else {
-        alert("Erro: " + data.message);
+    } catch (error) {
+        alert("Erro ao conectar com o servidor");
     }
-} catch (error) {
-    alert("Erro ao conectar com o servidor");
 }
 
 //Carrega as atividades ao iniciar a pagina
