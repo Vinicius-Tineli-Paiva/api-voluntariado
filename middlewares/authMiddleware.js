@@ -1,21 +1,19 @@
 const jwt = require("jsonwebtoken");
 
-const SECRET_KEY = process.env.JWT_SECRET;
-
-function authMiddleware(req, res, next) {
-    const token = req.header.authorization;
+const authMiddleware = (req, res, next) => {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
 
     if(!token) {
-        return res.status(401).json({ message: "Acesso não autorizado, token ausente" });
+        return res.status(401).json({ message: "Acesso não autorizado, autenticação necessária" });
     }
 
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-        if (err) {
-            return res.status(401).send("Token inválido");
-        }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
         next();
-    });
+    } catch (err) {
+        return res.status(401).json({ message: "Token inválido" });
+    }
 };
 
-module.exports = authMiddleware;
+module.exports = { authMiddleware };

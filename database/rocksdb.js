@@ -17,14 +17,14 @@ db.open((err) => {
 });
 
 //Adicionar dados
-const addData = (key, value) => {
+db.addData = (key, value) => {
     db.put(key, value, (err) => {
       if (err) console.error('Erro ao adicionar dados:', err);
     });
   };
 
 //Buscar dados
-const getData = (key, callback) => {
+db.getData = (key, callback) => {
     db.get(key, (err, value) => {
       if (err) {
         if (err.notFound) return callback(null);
@@ -33,7 +33,11 @@ const getData = (key, callback) => {
       }
       callback(value.toString());
     });
+};
+
+// Obter todos os dados
+db.getAllData = (callback) => {
+    db.iterator({}).each((key, value) => callback(key, value));
   };
 
-
-module.exports = { db, addData, getData }
+module.exports = { db }
