@@ -5,7 +5,7 @@ const helmet = require("helmet");
 const cookieParser = require("cookie-parser");
 
 const app = express();
-const port = process.env.PORT || 8080;
+const port = process.env.PORT;
 
 //Inicializa Middlewares globais
 app.use(helmet());
