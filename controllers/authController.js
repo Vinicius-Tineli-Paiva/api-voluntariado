@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
-const bcrypt = require("bcrypt"); // Importação do bcrypt
+const bcrypt = require("bcrypt");
 
 const SECRET_KEY = process.env.JWT_SECRET;
 
@@ -16,11 +16,11 @@ class AuthController {
 
         try {
             console.log(`Tentando registrar usuário: ${email}`);
-            console.log('Senha fornecida durante o registro:', password); // Log da senha fornecida
+            console.log('Senha fornecida durante o registro:', password);
 
             // Remove espaços em branco da senha
             const trimmedPassword = password.trim();
-            console.log('Senha após trim:', trimmedPassword); // Log da senha após trim
+            console.log('Senha após trim:', trimmedPassword);
 
             // Verifica se o e-mail já está cadastrado
             const existingUser = await User.findByEmail(email);
@@ -29,16 +29,11 @@ class AuthController {
                 return res.status(400).json({ message: 'E-mail já cadastrado' });
             }
 
-            // Criptografa a senha (usando bcrypt)
-            console.log('Criptografando senha...');
-            const hashedPassword = await bcrypt.hash(trimmedPassword, 10); // Usando bcrypt
-            console.log('Senha criptografada:', hashedPassword);
-
             // Define a role do usuário
             const role = isAdmin ? 'admin' : 'user';
 
-            // Cria o usuário
-            const user = await User.create(email, hashedPassword, role);
+            // Cria o usuário (sem criptografar a senha aqui!)
+            const user = await User.create(email, trimmedPassword, role);
             console.log('Usuário criado com sucesso:', user);
 
             res.status(201).json({ message: 'Usuário registrado com sucesso!' });
@@ -71,14 +66,14 @@ class AuthController {
 
             // Remove espaços em branco da senha fornecida
             const trimmedPassword = password.trim();
-            console.log('Senha fornecida após trim:', trimmedPassword); // Log da senha após trim
+            console.log('Senha fornecida após trim:', trimmedPassword);
 
             // Verifica se a senha está correta (usando bcrypt)
             console.log('Comparando senhas...');
             console.log('Senha fornecida:', trimmedPassword);
             console.log('Senha criptografada no banco:', user.password);
 
-            const isMatch = await bcrypt.compare(trimmedPassword, user.password); // Usando bcrypt
+            const isMatch = await bcrypt.compare(trimmedPassword, user.password);
             console.log('Resultado da comparação:', isMatch);
 
             if (!isMatch) {

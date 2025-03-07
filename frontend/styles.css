@@ -1,8 +1,9 @@
 /* Estilos simples */
 body {
     font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
+    margin: 3px;
+    padding: 3px;
+    box-sizing: border-box; /* Garante que padding e bordas não aumentem o tamanho dos elementos */
 }
 
 header {
@@ -29,7 +30,7 @@ button:hover {
 }
 
 #activities-container, #user-activities-container {
-    margin-top: 20px;
+    margin: 20px 5%; /* Margem superior de 20px e margens laterais de 5% */
 }
 
 .activity {
@@ -51,4 +52,42 @@ button:hover {
 .success-message {
     color: green;
     margin-top: 10px;
+}
+
+/* Estilos responsivos */
+@media (max-width: 768px) {
+    header {
+        padding: 15px; /* Aumenta o padding no header para dispositivos móveis */
+    }
+
+    h1 {
+        font-size: 24px; /* Reduz o tamanho da fonte do título em telas menores */
+    }
+
+    button {
+        width: 100%; /* Faz o botão ocupar toda a largura em dispositivos móveis */
+        margin-top: 10px; /* Adiciona um espaço acima do botão */
+    }
+
+    #activities-container, #user-activities-container {
+        margin: 20px 3%; /* Reduz a margem lateral para 3% em telas menores */
+    }
+
+    .activity {
+        padding: 15px; /* Aumenta o padding das atividades para melhorar a legibilidade */
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 20px; /* Reduz ainda mais o tamanho da fonte do título em telas muito pequenas */
+    }
+
+    #activities-container, #user-activities-container {
+        margin: 20px 2%; /* Reduz a margem lateral para 2% em telas muito pequenas */
+    }
+
+    .activity {
+        padding: 10px; /* Ajusta o padding para telas muito pequenas */
+    }
 }
